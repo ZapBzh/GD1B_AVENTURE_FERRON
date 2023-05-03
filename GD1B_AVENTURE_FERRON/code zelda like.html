@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>projet Zelda like 2023</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js">
+    </script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+
+
+<body>
+    <script type="text/javascript">
+
+
+
+        class jeu extends Phaser.Scene {
+            constructor() {
+                super("jeu");
+
+            }
+
+
+
+            preload() {
+                this.load.spritesheet('perso', 'assets/perso-Sheet.png',
+                    { frameWidth: 44, frameHeight: 58 });
+                this.load.image('asset', 'assets/asset.png');
+                this.load.image('transi_couche', 'assets/transi_couche.png');
+                this.load.image('transi_debout', 'assets/transi_debout.png');
+                this.load.image('cache_perso', 'assets/cache_perso.png');
+                this.load.image('crabe', 'assets/crabe.png');
+                this.load.image('dialogue_crabe ', 'assets/dialogue_crabe.png');
+
+                this.load.tilemapTiledJSON("carte", "assets/concept_LD_map_et_salle.json");
+
+
+
+
+            }
+            //crabe_dialogue() {
+            //    this.add.image(3855, 5450, 'dialogue_crabe');
+            //
+            //
+            //}
+
+            create() {
+
+
+
+                const carteDuNiveau = this.add.tilemap("carte");
+
+                const tileset = carteDuNiveau.addTilesetImage(
+                    "asset",
+                    "asset"
+                );
+
+                const chemin = carteDuNiveau.createLayer(
+                    "chemin",
+                    tileset
+                );
+                const terraforming = carteDuNiveau.createLayer(
+                    "terraforming",
+                    tileset
+                );
+                const arbres = carteDuNiveau.createLayer(
+                    "arbres",
+                    tileset
+                );
+                const indication = carteDuNiveau.createLayer(
+                    "indication",
+                    tileset
+                );
+                const ennemie = carteDuNiveau.createLayer(
+                    "ennemie",
+                    tileset
+                );
+                const boutton = carteDuNiveau.createLayer(
+                    "boutton",
+                    tileset
+                );
+
+                this.hub_bas = this.physics.add.staticGroup(); // tout se qui est "this.hub_bas" est immobile
+                this.hub_bas.create(5935, 7880, 'transi_couche');
+
+                this.hub_droite = this.physics.add.staticGroup(); // tout se qui est "this.hub_bas" est immobile
+                this.hub_droite.create(8100, 2720, 'transi_couche');
+                
+                this.village = this.physics.add.staticGroup(); // tout se qui est "this.hub_bas" est immobile
+                this.village.create(5930, 5935, 'transi_couche');
+
+
+                this.foret_bas = this.physics.add.staticGroup();
+                this.foret_bas.create(7755, 5150, 'transi_couche');
+
+                this.boss = this.physics.add.staticGroup();
+                this.boss.create(5060, 3400, 'transi_debout');
+
+                this.hub_haut = this.physics.add.staticGroup();
+                this.hub_haut.create(2840, 2490, 'transi_debout');
+
+                this.tour = this.physics.add.staticGroup();
+                this.tour.create(2360, 1760, 'transi_couche');
+
+                this.etage1 = this.physics.add.staticGroup();
+                this.etage1.create(5980, 475, 'transi_couche');
+
+                this.etage2 = this.physics.add.staticGroup();
+                this.etage2.create(190, 150, 'transi_debout');
+
+                this.etage3 = this.physics.add.staticGroup();
+                this.etage3.create(2048, 150, 'transi_debout');
+
+                this.fin = this.physics.add.staticGroup();
+                this.fin.create(3840, 150, 'transi_debout');
+
+
+                this.crabe = this.physics.add.staticGroup();
+                this.crabe.create(3855, 5450, 'crabe');
+
+                chemin.setCollisionByProperty({ solide: true });
+                arbres.setCollisionByProperty({ solide: true });
+                terraforming.setCollisionByProperty({ solide: true });
+                terraforming.setCollisionByProperty({ vide: true });
+
+
+                //this.add.image(3855, 5450, 'crabe');
+
+                this.player = this.physics.add.sprite(6130, 9200, 'perso');
+                this.player.setCollideWorldBounds(false);
+
+
+                this.physics.add.collider(this.player, chemin);
+                this.physics.add.collider(this.player, terraforming);
+                this.physics.add.collider(this.player, arbres);
+                this.physics.add.collider(this.player, this.hub_bas, this.tp_hub_bas, null, this); //colission activé entre player et this.hub_bas
+                this.physics.add.collider(this.player, this.hub_droite, this.tp_hub_droit, null, this,); //colission activé entre player et this.hub_bas
+                this.physics.add.collider(this.player, this.hub_haut, this.tp_hub_haut, null, this,); //colission activé entre player et this.hub_bas
+                this.physics.add.collider(this.player, this.tour, this.tp_tour, null, this,); //colission activé entre player et this.hub_bas
+                
+                this.physics.add.collider(this.player, this.boss, this.tp_boss, null, this); //colission activé entre player et this.hub_bas
+                this.physics.add.collider(this.player, this.foret_bas, this.tp_foret_bas, null, this); //colission activé entre player et this.hub_bas
+                this.physics.add.collider(this.player, this.village, this.tp_village, null, this,); //colission activé entre player et this.hub_bas
+                
+                this.physics.add.collider(this.player, this.etage1, this.tp_etage1, null, this,); //colission activé entre player et this.hub_bas
+                this.physics.add.collider(this.player, this.etage2, this.tp_etage2, null, this,); //colission activé entre player et this.hub_bas
+                this.physics.add.collider(this.player, this.etage3, this.tp_etage3, null, this,); //colission activé entre player et this.hub_bas
+                this.physics.add.collider(this.player, this.fin, this.tp_fin, null, this,); //colission activé entre player et this.hub_bas
+
+                
+                this.physics.add.collider(this.player, this.crabe/*, this.crabe_dialogue, null, this*/); //colission activé entre player et this.crabe
+
+
+
+                this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+
+
+
+
+                // redimentionnement du monde avec les dimensions calculées via tiled
+                this.physics.world.setBounds(0, 0, 91204, 91204);
+                //  ajout du champs de la caméra de taille identique à celle du monde
+                this.cameras.main.setBounds(0, 0, 91204, 91204);
+                // ancrage de la caméra sur le joueur
+                this.cameras.main.startFollow(this.player);
+                this.cameras.main.zoom = 2;
+
+                ////////////////Animation sans armure //////////////
+                this.anims.create({
+                    key: 'left_non',
+                    frames: this.anims.generateFrameNumbers('perso', { start: 12, end: 15 }),
+                    frameRate: 10,
+                    repeat: -1
+                });
+                this.anims.create({
+                    key: 'turn_non',
+                    frames: [{ key: 'perso', frame: 0 }],
+                    frameRate: 20
+                });
+                this.anims.create({
+                    key: 'right_non',
+                    frames: this.anims.generateFrameNumbers('perso', { start: 8, end: 11 }),
+                    frameRate: 10,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key: 'down_non',
+                    frames: this.anims.generateFrameNumbers('perso', { start: 0, end: 3 }),
+                    frameRate: 10,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key: 'up_non',
+                    frames: this.anims.generateFrameNumbers('perso', { start: 4, end: 7 }),
+                    frameRate: 10,
+                    repeat: -1
+                });
+
+                ////////////Animation avec armure///////////////////
+
+                this.anims.create({
+                    key: 'left_oui',
+                    frames: this.anims.generateFrameNumbers('perso', { start: 28, end: 31 }),
+                    frameRate: 10,
+                    repeat: -1
+                });
+                this.anims.create({
+                    key: 'turn_oui',
+                    frames: [{ key: 'perso', frame: 16 }],
+                    frameRate: 20
+                });
+                this.anims.create({
+                    key: 'right_oui',
+                    frames: this.anims.generateFrameNumbers('perso', { start: 24, end: 27 }),
+                    frameRate: 10,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key: 'down_oui',
+                    frames: this.anims.generateFrameNumbers('perso', { start: 16, end: 19 }),
+                    frameRate: 10,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key: 'up_oui',
+                    frames: this.anims.generateFrameNumbers('perso', { start: 20, end: 23 }),
+                    frameRate: 10,
+                    repeat: -1
+                });
+
+                this.cursors = this.input.keyboard.createCursorKeys();
+
+                this.add.image(4800, 4800, 'cache_perso');
+            }
+
+
+            tp_tour() {
+                this.player.body.x = 5980; //cordonée du joueur en x
+                this.player.body.y = 1405;//cordonée du joueur en y
+            }
+
+            tp_etage1() {
+                this.player.body.x = 50; //cordonée du joueur en x
+                this.player.body.y = 600;//cordonée du joueur en y
+            }
+            tp_etage2() {
+                this.player.body.x = 1925; //cordonée du joueur en x
+                this.player.body.y = 600;//cordonée du joueur en y
+            }
+
+            tp_etage3() {
+                this.player.body.x = 3710; //cordonée du joueur en x
+                this.player.body.y = 675;//cordonée du joueur en y
+            }
+            tp_fin() {
+                this.player.body.x = 7950; //cordonée du joueur en x
+                this.player.body.y = 600;//cordonée du joueur en y
+            }
+
+
+
+            tp_village() {
+                this.player.body.x = 5935; //cordonée du joueur en x
+                this.player.body.y = 7980;//cordonée du joueur en y
+            }
+            tp_hub_droit() {
+                this.player.body.x = 7740; //cordonée du joueur en x
+                this.player.body.y = 5175;//cordonée du joueur en y
+            }
+            tp_hub_bas() {
+                this.player.body.x = 5930; //cordonée du joueur en x
+                this.player.body.y = 5735;//cordonée du joueur en y
+            }
+
+            tp_hub_haut() {
+                this.player.body.x = 5070, //cordonée du joueur en x
+                this.player.body.y = 3380;//cordonée du joueur en y
+            }
+
+
+            tp_boss() {
+                this.player.body.x = 2790; //cordonée du joueur en x
+                this.player.body.y = 2450;//cordonée du joueur en y
+            }
+
+            tp_foret_bas() {
+                this.player.body.x = 8040; //cordonée du joueur en x
+                this.player.body.y = 2520;//cordonée du joueur en y
+            }
+
+            update() {
+
+
+                if (this.cursors.left.isDown && this.spacebar.isDown) {  //si la touche espace est appuyée
+
+                    this.player.setVelocityX(-1000);
+                    //terraforming.setCollisionByProperty({ vide: false });//console.log("hello");
+                }
+                else if (this.cursors.left.isDown) { //si la touche gauche est appuyée
+                    this.player.setVelocityX(-200); //alors vitesse négative en X
+                    this.player.anims.play('left_oui', true); //et animation => gauche
+                }
+
+                else if (this.cursors.right.isDown && this.spacebar.isDown) {  //si la touche espace est appuyée
+
+                    this.player.setVelocityX(1000);
+                    //terraforming.setCollisionByProperty({ vide: false });//console.log("hello");
+                }
+                else if (this.cursors.right.isDown) { //sinon si la touche droite est appuyée
+                    this.player.setVelocityX(200); //alors vitesse positive en X
+                    this.player.anims.play('right_oui', true); //et animation => droite
+
+                }
+
+                else if (this.cursors.down.isDown && this.spacebar.isDown) {  //si la touche espace est appuyée
+
+                    this.player.setVelocityY(1000);
+                    //terraforming.setCollisionByProperty({ vide: false });//console.log("hello");
+                }
+                else if (this.cursors.down.isDown) { //descendre plus vite
+                    this.player.setVelocityY(200);
+                    this.player.anims.play('down_oui', true); //et animation => droite
+                }
+                else if (this.cursors.up.isDown && this.spacebar.isDown) {  //si la touche espace est appuyée
+
+                    this.player.setVelocityY(-1000);
+                    //terraforming.setCollisionByProperty({ vide: false });//console.log("hello");
+                }
+                else if (this.cursors.up.isDown) { //descendre plus vite
+                    this.player.setVelocityY(-200);
+                    this.player.anims.play('up_oui', true); //animation ==> haut
+                }
+                else if (this.cursors.up.isDown && this.spacebar.isDown)  //si la touche espace est appuyée
+
+                    this.player.setVelocityY(-500);
+
+                else { // sinon
+                    this.player.setVelocityX(0); //vitesse nulle
+                    this.player.setVelocityY(0)
+                    this.player.anims.play('turn_oui'); //animation fait face caméra
+                }
+
+
+                if (this.player.body.blocked.crabe) {
+
+                    this.add.image(3855, 5450, 'dialogue_crabe');
+                    //(crabe_dialogue, true); 
+
+                }
+
+
+
+
+            };
+        }
+
+        class menu extends Phaser.Scene {
+            constructor() {
+                super("menu");
+            }
+
+            preload() {
+                this.load.image('play', 'assets/bouton_play.png')
+                this.load.image('fond_acceuil', 'assets/fond_acceuil.png')
+                //ici le code de la fonction preload
+            }
+            create() {
+                this.add.image(960, 540, 'fond_acceuil');
+                this.bouton = this.add.image(960, 540, 'play').setInteractive().setScale(1.5);
+                this.bouton.on('pointerdown', function (pointer) { this.scene.scene.start("jeu"); });
+                //ici le code de la fonction create
+            }
+            update() {
+                //ici le code de la fonction update
+            }
+
+
+
+        };
+
+
+        var config = {
+            type: Phaser.AUTO,
+            width: 1920, height: 1080,
+
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 },
+                    debug: false
+
+                }
+            },
+            input: { gamepad: true },
+            pixelArt: true,
+            scene: [menu,jeu, ]
+
+        };
+        new Phaser.Game(config);
+
+    </script>
+</body>
+
+</html>
